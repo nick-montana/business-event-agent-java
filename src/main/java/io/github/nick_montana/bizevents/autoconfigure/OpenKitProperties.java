@@ -1,7 +1,6 @@
 package io.github.nick_montana.bizevents.autoconfigure;
 
 import com.dynatrace.openkit.api.OpenKitConstants;
-import com.dynatrace.openkit.core.configuration.ConfigurationDefaults;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 
@@ -120,6 +119,42 @@ public class OpenKitProperties {
 
     private String applicationName;
     private String applicationVersion;
+
+    /*
+     * Beacon cache settings are bound as raw strings so that BeaconCacheConfig can validate them,
+     * log bad configuration and fall back to the OpenKit defaults instead of failing start-up.
+     * null means the property is not set.
+     *
+     * beaconCacheMaxRecordAge: duration such as 10m, 60s, 500ms or a plain number of milliseconds
+     * beaconCacheLowerMemoryBoundary / beaconCacheUpperMemoryBoundary: whole number of megabytes, e.g. 80
+     */
+    private String beaconCacheMaxRecordAge;
+    private String beaconCacheLowerMemoryBoundary;
+    private String beaconCacheUpperMemoryBoundary;
+
+    public String getBeaconCacheMaxRecordAge() {
+        return beaconCacheMaxRecordAge;
+    }
+
+    public void setBeaconCacheMaxRecordAge(String beaconCacheMaxRecordAge) {
+        this.beaconCacheMaxRecordAge = beaconCacheMaxRecordAge;
+    }
+
+    public String getBeaconCacheLowerMemoryBoundary() {
+        return beaconCacheLowerMemoryBoundary;
+    }
+
+    public void setBeaconCacheLowerMemoryBoundary(String beaconCacheLowerMemoryBoundary) {
+        this.beaconCacheLowerMemoryBoundary = beaconCacheLowerMemoryBoundary;
+    }
+
+    public String getBeaconCacheUpperMemoryBoundary() {
+        return beaconCacheUpperMemoryBoundary;
+    }
+
+    public void setBeaconCacheUpperMemoryBoundary(String beaconCacheUpperMemoryBoundary) {
+        this.beaconCacheUpperMemoryBoundary = beaconCacheUpperMemoryBoundary;
+    }
 
     private long deviceId;
 
