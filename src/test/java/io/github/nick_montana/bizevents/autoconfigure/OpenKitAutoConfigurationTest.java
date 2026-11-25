@@ -29,6 +29,41 @@ public class OpenKitAutoConfigurationTest {
     }
 
     @Test
+    public void testBeaconCachePropertiesAreBoundAndContextStarts() {
+        contextRunner.withPropertyValues(
+                "openkit.bizevents.applicationId=test",
+                "openkit.bizevents.deviceId=123456",
+                "openkit.bizevents.endpointUrl=https://tenantid.beaconurl.com/mbeacon",
+                "openkit.bizevents.waitForInitCompletion=false",
+                "openkit.bizevents.beaconCacheMaxRecordAge=10m",
+                "openkit.bizevents.beaconCacheLowerMemoryBoundary=20",
+                "openkit.bizevents.beaconCacheUpperMemoryBoundary=80"
+        ).run((context) -> {
+            assertThat(context).hasSingleBean(BizEventAgent.class);
+            OpenKitProperties properties = context.getBean(OpenKitProperties.class);
+            Assertions.assertEquals("10m", properties.getBeaconCacheMaxRecordAge());
+            Assertions.assertEquals("20", properties.getBeaconCacheLowerMemoryBoundary());
+            Assertions.assertEquals("80", properties.getBeaconCacheUpperMemoryBoundary());
+        });
+    }
+
+    @Test
+    public void testBadBeaconCachePropertiesDoNotFailStartup() {
+        contextRunner.withPropertyValues(
+                "openkit.bizevents.applicationId=test",
+                "openkit.bizevents.deviceId=123456",
+                "openkit.bizevents.endpointUrl=https://tenantid.beaconurl.com/mbeacon",
+                "openkit.bizevents.waitForInitCompletion=false",
+                "openkit.bizevents.beaconCacheMaxRecordAge=ten minutes",
+                "openkit.bizevents.beaconCacheLowerMemoryBoundary=80MB",
+                "openkit.bizevents.beaconCacheUpperMemoryBoundary=-1"
+        ).run((context) -> {
+            assertThat(context).hasNotFailed();
+            assertThat(context).hasSingleBean(BizEventAgent.class);
+        });
+    }
+
+    @Test
     public void testAutoConfigurationWithMissingRequiredProperties() {
 
         IllegalArgumentException exception = Assertions.assertThrows(

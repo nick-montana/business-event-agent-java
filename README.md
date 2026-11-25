@@ -107,7 +107,7 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'io.github.nick-montana:bizevent-agent:1.0.0'
+    implementation 'io.github.nick-montana:bizevent-agent:0.0.5-SNAPSHOT'
 }
 ```
 
@@ -116,13 +116,13 @@ With this option, `openkit-java` comes in as a transitive `api` dependency, so t
 **Option 2: reference the built JAR directly**
 
 ```sh
-./gradlew build   # produces build/libs/bizevent-agent-1.0.0-plain.jar
+./gradlew build   # produces build/libs/bizevent-agent-0.0.5-SNAPSHOT-plain.jar
 ```
 
 ```groovy
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
-    implementation files('{PATH_TO_JAR}/bizevent-agent-1.0.0-plain.jar')
+    implementation files('{PATH_TO_JAR}/bizevent-agent-0.0.5-SNAPSHOT-plain.jar')
     // a file dependency carries no transitive dependencies, so add OpenKit yourself
     implementation 'com.dynatrace.openkit:openkit-java:3.3.0'
 }
@@ -151,6 +151,11 @@ openkit.bizevents.manufacturer={TEAM_NAME}
 openkit.bizevents.waitForInitCompletion=true
 openkit.bizevents.disableSslVerification=false
 openkit.bizevents.logLevel=INFO
+
+# Optional: beacon cache eviction (OpenKit defaults are used when not set)
+openkit.bizevents.beaconCacheMaxRecordAge=45m
+openkit.bizevents.beaconCacheLowerMemoryBoundary=80
+openkit.bizevents.beaconCacheUpperMemoryBoundary=100
 ```
 
 | Property | Required | Default | Description |
@@ -164,6 +169,11 @@ openkit.bizevents.logLevel=INFO
 | `waitForInitCompletion` | no | `false` | If `true`, start-up blocks for up to 60 seconds until OpenKit finishes initializing. If `false`, start-up continues right away and events are cached until initialization completes. |
 | `disableSslVerification` | no | `false` | Trusts any certificate (OpenKit's `SSLBlindTrustManager`). Use only for non-production environments with self-signed certificates. |
 | `logLevel` | no | OpenKit default | OpenKit log level: `DEBUG`, `INFO`, `WARN` or `ERROR`. |
+| `beaconCacheMaxRecordAge` | no | `45m` | How long a cached event is kept before time-based eviction drops it. Accepts minutes (`10m`), seconds (`60s`), milliseconds (`500ms`) or a plain number of milliseconds. |
+| `beaconCacheLowerMemoryBoundary` | no | `80` | Whole number of megabytes (MiB), no unit. When space-based eviction runs, it evicts down to this size. |
+| `beaconCacheUpperMemoryBoundary` | no | `100` | Whole number of megabytes (MiB), no unit. Space-based eviction starts when the cache grows past this size. Must be greater than the lower boundary. |
+
+The starter logs which beacon cache values it uses. If a beacon cache property is missing, it logs that the OpenKit default is used. If a value is invalid (wrong format, zero or negative, or a lower boundary that isn't below the upper one), it logs a bad-configuration warning and uses the OpenKit default instead of failing start-up.
 
 ### Sending business events
 
