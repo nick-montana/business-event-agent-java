@@ -1,4 +1,4 @@
-package com.intelliplatforms.bizevents.autoconfigure;
+package io.github.nick_montana.bizevents.autoconfigure;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -18,11 +18,11 @@ public class OpenKitAutoConfigurationTest {
     @Test
     public void testAutoConfigurationWithOnlyRequiredProperties() {
         contextRunner.withPropertyValues(
-                "com.intelliplatforms.bizevents.enabled=true",
-                "com.intelliplatforms.bizevents.applicationId=test",
-                "com.intelliplatforms.bizevents.deviceId=123456",
-                "com.intelliplatforms.bizevents.endpointUrl=https://tenantid.beaconurl.com/mbeacon",
-                "rumagent.bizevents.waitForInitCompletion=false"
+                "openkit.bizevents.enabled=true",
+                "openkit.bizevents.applicationId=test",
+                "openkit.bizevents.deviceId=123456",
+                "openkit.bizevents.endpointUrl=https://tenantid.beaconurl.com/mbeacon",
+                "openkit.bizevents.waitForInitCompletion=false"
         ).run((context) -> {
             assertThat(context).hasSingleBean(BizEventAgent.class);
         });
@@ -37,10 +37,10 @@ public class OpenKitAutoConfigurationTest {
         );
 
         contextRunner.withPropertyValues(
-                "rumagent.bizevents.enabled=true",
-                "rumagent.bizevents.deviceId=123456",
-                "rumagent.bizevents.endpointUrl=https://tenantid.beaconurl.com/mbeacon",
-                "rumagent.bizevents.waitForInitCompletion=false"
+                "openkit.bizevents.enabled=true",
+                "openkit.bizevents.deviceId=123456",
+                "openkit.bizevents.endpointUrl=https://tenantid.beaconurl.com/mbeacon",
+                "openkit.bizevents.waitForInitCompletion=false"
         ).run((context) -> {
             Assertions.assertEquals("Missing value for required property applicationId!", exception.getMessage());
         });
@@ -51,14 +51,14 @@ public class OpenKitAutoConfigurationTest {
     public void testAutoConfigurationWithOptionalProperties() {
 
         contextRunner.withPropertyValues(
-                "rumagent.bizevents.enabled=true",
-                "openkit.applicationId=test",
-                "openkit.waitForInitCompletion=false",
-                "openkit.deviceId=123456",
-                "openkit.endpointUrl=https://tenantid.beaconurl.com/mbeacon",
-                "openkit.applicationName=mockApplicationName",
-                "openkit.namespace=mockTeamName",
-                "openkit.applicationVersion=1.2.3").run((context) -> {
+                "openkit.bizevents.enabled=true",
+                "openkit.bizevents.applicationId=test",
+                "openkit.bizevents.waitForInitCompletion=false",
+                "openkit.bizevents.deviceId=123456",
+                "openkit.bizevents.endpointUrl=https://tenantid.beaconurl.com/mbeacon",
+                "openkit.bizevents.applicationName=mockApplicationName",
+                "openkit.bizevents.namespace=mockTeamName",
+                "openkit.bizevents.applicationVersion=1.2.3").run((context) -> {
             assertThat(context).hasSingleBean(BizEventAgent.class);
         });
     }
@@ -69,10 +69,10 @@ public class OpenKitAutoConfigurationTest {
     public void testDisableAutoConfigurationWithExplicitBoolean() {
 
         contextRunner.withPropertyValues(
-                "rumagent.bizevents.enabled=false",
-                "openkit.applicationId=test",
-                "openkit.deviceId=123456",
-                "openkit.endpointUrl=test"
+                "openkit.bizevents.enabled=false",
+                "openkit.bizevents.applicationId=test",
+                "openkit.bizevents.deviceId=123456",
+                "openkit.bizevents.endpointUrl=test"
         ).run((context) -> {
             assertThat(context).doesNotHaveBean(BizEventAgent.class);
         });

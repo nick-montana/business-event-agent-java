@@ -1,4 +1,4 @@
-package com.intelliplatforms.bizevents.autoconfigure;
+package io.github.nick_montana.bizevents.autoconfigure;
 
 import com.dynatrace.openkit.api.OpenKit;
 import com.dynatrace.openkit.api.Session;
@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 
 @AutoConfiguration
-@ConditionalOnBooleanProperty(name = "rumagent.bizevents.enabled", matchIfMissing = true)
+@ConditionalOnBooleanProperty(name = "openkit.bizevents.enabled", matchIfMissing = true)
 @EnableConfigurationProperties(OpenKitProperties.class)
 public class OpenKitAutoConfiguration {
 

@@ -1,4 +1,4 @@
-package com.intelliplatforms.bizevents.autoconfigure;
+package io.github.nick_montana.bizevents.autoconfigure;
 
 import com.dynatrace.openkit.CrashReportingLevel;
 import com.dynatrace.openkit.DataCollectionLevel;
@@ -38,8 +38,10 @@ public interface AutoConfigUtils {
         if(properties.getLogLevel() != null) {
             openKitBuilder.withLogLevel(setOpenKitLogger(properties.getLogLevel()));
         }
-        String osManufacturer = System.getProperty("os.manufacturer").toLowerCase();
-        openKitBuilder.withManufacturer(osManufacturer);
+        // only set the manufacturer if it is explicitly configured
+        if (properties.getManufacturer() != null) {
+            openKitBuilder.withManufacturer(properties.getManufacturer());
+        }
         openKitBuilder.withModelID(properties.getApplicationName());
         openKitBuilder.withOperatingSystem(getOS().toString());
         openKitBuilder.withApplicationVersion(openKitBuilder.getApplicationVersion());
