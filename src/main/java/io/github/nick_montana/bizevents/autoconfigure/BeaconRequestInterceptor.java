@@ -1,4 +1,4 @@
-package com.intelliplatforms.bizevents.autoconfigure;
+package io.github.nick_montana.bizevents.autoconfigure;
 
 import com.dynatrace.openkit.api.http.HttpRequest;
 import com.dynatrace.openkit.api.http.HttpRequestInterceptor;

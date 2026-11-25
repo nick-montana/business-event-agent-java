@@ -1,4 +1,4 @@
-package com.intelliplatforms.bizevents.autoconfigure;
+package io.github.nick_montana.bizevents.autoconfigure;
 
 import com.dynatrace.openkit.api.OpenKitConstants;
 import com.dynatrace.openkit.core.configuration.ConfigurationDefaults;
@@ -21,7 +21,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * <a href="http://json.org/">OpenKit GitHub Documentation</a>.
  */
-@ConfigurationProperties(prefix = "rumagent.bizevents")
+@ConfigurationProperties(prefix = "openkit.bizevents")
 public class OpenKitProperties {
 
 

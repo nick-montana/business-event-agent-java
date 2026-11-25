@@ -54,7 +54,7 @@ The whole OpenKit lifecycle is tied to the Spring application context:
 
 | Phase | What happens | Where |
 |---|---|---|
-| **Start-up** | Spring Boot auto-configuration reads the `rumagent.bizevents.*` properties, builds a `DynatraceOpenKitBuilder` and initializes OpenKit. You don't write any configuration code. | `OpenKitAutoConfiguration`, `AutoConfigUtils` |
+| **Start-up** | Spring Boot auto-configuration reads the `openkit.bizevents.*` properties, builds a `DynatraceOpenKitBuilder` and initializes OpenKit. You don't write any configuration code. | `OpenKitAutoConfiguration`, `AutoConfigUtils` |
 | **Session creation** | Once OpenKit is initialized, a single long-lived `Session` is created and wrapped in a `BizEventAgent` singleton bean. | `OpenKitAutoConfiguration#injectBizEventAgent` |
 | **Runtime** | Your code calls `bizEventAgent.sendBizEvent(...)`. The call returns right away; OpenKit caches the event and its background threads send it. If the Dynatrace backend's configuration calls for a session split, OpenKit does it transparently, so you never deal with sessions. | `BizEventAgent` |
 | **Shutdown** | When the application context closes, Spring calls `BizEventAgent#close()`, which calls `OpenKit#shutdown()`. OpenKit flushes all unsent data and then stops its background threads. | `@Bean(destroyMethod = "close")` |
@@ -64,7 +64,7 @@ The whole OpenKit lifecycle is tied to the Spring application context:
 The configuration is opinionated. Its only purpose is exporting bizevents:
 
 - **RUM data collection and crash reporting are turned off** (`DataCollectionLevel.OFF`, `CrashReportingLevel.OFF`), so the session doesn't produce user actions, user tags or crash reports.
-- **Device metadata is filled in for you**: the operating system is detected from the JVM, and `applicationName` is sent as the OpenKit model ID.
+- **Device metadata is filled in for you**: the operating system is detected from the JVM, `applicationName` is sent as the OpenKit model ID, and `manufacturer` as the device manufacturer.
 - **A custom `User-Agent` header** (`CUSTOM_APP_ID<applicationId>`) is added to every beacon request by `BeaconRequestInterceptor`, so this traffic is easy to spot in Dynatrace.
 - **The `BizEventExporter` interface** (`sendBizEvent(String, Map<String, JSONValue>)`) is the only API you code against.
 
@@ -107,7 +107,7 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'com.intelliplatforms:bizevent-agent:0.0.3-SNAPSHOT'
+    implementation 'io.github.nick-montana:bizevent-agent:0.0.4-SNAPSHOT'
 }
 ```
 
@@ -116,13 +116,13 @@ With this option, `openkit-java` comes in as a transitive `api` dependency, so t
 **Option 2: reference the built JAR directly**
 
 ```sh
-./gradlew build   # produces build/libs/bizevent-agent-0.0.3-SNAPSHOT-plain.jar
+./gradlew build   # produces build/libs/bizevent-agent-0.0.4-SNAPSHOT-plain.jar
 ```
 
 ```groovy
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
-    implementation files('{PATH_TO_JAR}/bizevent-agent-0.0.3-SNAPSHOT-plain.jar')
+    implementation files('{PATH_TO_JAR}/bizevent-agent-0.0.4-SNAPSHOT-plain.jar')
     // a file dependency carries no transitive dependencies, so add OpenKit yourself
     implementation 'com.dynatrace.openkit:openkit-java:3.3.0'
 }
@@ -138,18 +138,19 @@ Set these properties in your service's `application.properties` (or the YAML equ
 
 ```properties
 # Turn the starter on or off (default: true)
-rumagent.bizevents.enabled=true
+openkit.bizevents.enabled=true
 
 # Required: OpenKit / Dynatrace connection
-rumagent.bizevents.endpointUrl=https://{ENVIRONMENT_ACTIVE_GATE}:9999/mbeacon/{TENANT_ID}
-rumagent.bizevents.applicationId={CUSTOM_APPLICATION_ID}
-rumagent.bizevents.deviceId={NUMERIC_DEVICE_ID}
+openkit.bizevents.endpointUrl=https://{ENVIRONMENT_ACTIVE_GATE}:9999/mbeacon/{TENANT_ID}
+openkit.bizevents.applicationId={CUSTOM_APPLICATION_ID}
+openkit.bizevents.deviceId={NUMERIC_DEVICE_ID}
 
 # Optional
-rumagent.bizevents.applicationName={APPLICATION_NAME}
-rumagent.bizevents.waitForInitCompletion=true
-rumagent.bizevents.disableSslVerification=false
-rumagent.bizevents.logLevel=INFO
+openkit.bizevents.applicationName={APPLICATION_NAME}
+openkit.bizevents.manufacturer={TEAM_NAME}
+openkit.bizevents.waitForInitCompletion=true
+openkit.bizevents.disableSslVerification=false
+openkit.bizevents.logLevel=INFO
 ```
 
 | Property | Required | Default | Description |
@@ -159,6 +160,7 @@ rumagent.bizevents.logLevel=INFO
 | `applicationId` | **yes** | — | ID of the custom application in Dynatrace that receives the beacons. Also used in the `User-Agent` header. |
 | `deviceId` | **yes** | — | Numeric (`long`) device identifier passed to OpenKit. |
 | `applicationName` | no | — | Sent to OpenKit as the model ID. |
+| `manufacturer` | no | — | Sent to OpenKit as the device manufacturer (for example, your team name). |
 | `waitForInitCompletion` | no | `false` | If `true`, start-up blocks for up to 60 seconds until OpenKit finishes initializing. If `false`, start-up continues right away and events are cached until initialization completes. |
 | `disableSslVerification` | no | `false` | Trusts any certificate (OpenKit's `SSLBlindTrustManager`). Use only for non-production environments with self-signed certificates. |
 | `logLevel` | no | OpenKit default | OpenKit log level: `DEBUG`, `INFO`, `WARN` or `ERROR`. |
@@ -171,7 +173,7 @@ Inject `BizEventAgent` (or the `BizEventExporter` interface) wherever you need i
 import com.dynatrace.openkit.util.json.objects.JSONNumberValue;
 import com.dynatrace.openkit.util.json.objects.JSONStringValue;
 import com.dynatrace.openkit.util.json.objects.JSONValue;
-import com.intelliplatforms.bizevents.autoconfigure.BizEventAgent;
+import io.github.nick_montana.bizevents.autoconfigure.BizEventAgent;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -207,7 +209,7 @@ You never create, end or split a session yourself, and you never call `OpenKit#s
 
 ## Security
 
-Beacons are sent to the Dynatrace endpoint (directly or through an ActiveGate) over HTTPS with TLS. Certificate verification is on by default. Only set `rumagent.bizevents.disableSslVerification=true` in environments where you accept the risk of trusting any certificate.
+Beacons are sent to the Dynatrace endpoint (directly or through an ActiveGate) over HTTPS with TLS. Certificate verification is on by default. Only set `openkit.bizevents.disableSslVerification=true` in environments where you accept the risk of trusting any certificate.
 
 ## Maintainers
 
