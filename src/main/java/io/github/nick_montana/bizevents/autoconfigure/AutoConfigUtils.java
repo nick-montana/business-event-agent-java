@@ -47,8 +47,25 @@ public interface AutoConfigUtils {
         openKitBuilder.withApplicationVersion(openKitBuilder.getApplicationVersion());
         openKitBuilder.withDataCollectionLevel(bizeventAgentCollectionLevel);
         openKitBuilder.withCrashReportingLevel(CrashReportingLevel.OFF);
+        configureBeaconCache(openKitBuilder, properties);
         return openKitBuilder;
     };
+
+    /* Applies the beacon cache eviction settings
+     *  - user-defined values are validated and converted (duration -> milliseconds, megabytes -> bytes)
+     *  - unset or invalid values fall back to the OpenKit defaults, and BeaconCacheConfig logs which one was used
+     * */
+    static void configureBeaconCache(DynatraceOpenKitBuilder openKitBuilder, OpenKitProperties properties) {
+        long maxRecordAgeMillis = BeaconCacheConfig.resolveMaxRecordAge(properties.getBeaconCacheMaxRecordAge());
+        BeaconCacheConfig.MemoryBoundaries boundaries = BeaconCacheConfig.resolveMemoryBoundaries(
+                properties.getBeaconCacheLowerMemoryBoundary(),
+                properties.getBeaconCacheUpperMemoryBoundary()
+        );
+
+        openKitBuilder.withBeaconCacheMaxRecordAge(maxRecordAgeMillis);
+        openKitBuilder.withBeaconCacheLowerMemoryBoundary(boundaries.lowerBytes());
+        openKitBuilder.withBeaconCacheUpperMemoryBoundary(boundaries.upperBytes());
+    }
 
     /* Throws Exception if implementation is missing required properties
      *  - this prevents failure during OpenKit initialization
