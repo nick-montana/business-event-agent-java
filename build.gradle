@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'io.github.nick-montana'
-version = '0.0.4-SNAPSHOT'
+version = '1.0.0'
 description = 'OpenKit Auto-Configuration SpringBoot Starter Library. ' +
         'It injects an easy-to-use bizevent exporter by managing all required OpenKit/Session logic using auto-configuration'
 

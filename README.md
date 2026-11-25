@@ -107,7 +107,7 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'io.github.nick-montana:bizevent-agent:0.0.4-SNAPSHOT'
+    implementation 'io.github.nick-montana:bizevent-agent:1.0.0'
 }
 ```
 
@@ -116,13 +116,13 @@ With this option, `openkit-java` comes in as a transitive `api` dependency, so t
 **Option 2: reference the built JAR directly**
 
 ```sh
-./gradlew build   # produces build/libs/bizevent-agent-0.0.4-SNAPSHOT-plain.jar
+./gradlew build   # produces build/libs/bizevent-agent-1.0.0-plain.jar
 ```
 
 ```groovy
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
-    implementation files('{PATH_TO_JAR}/bizevent-agent-0.0.4-SNAPSHOT-plain.jar')
+    implementation files('{PATH_TO_JAR}/bizevent-agent-1.0.0-plain.jar')
     // a file dependency carries no transitive dependencies, so add OpenKit yourself
     implementation 'com.dynatrace.openkit:openkit-java:3.3.0'
 }
